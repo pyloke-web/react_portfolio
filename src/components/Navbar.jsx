@@ -1,37 +1,36 @@
-import { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { links } from '../data';
-import { GoThreeBars } from 'react-icons/go';
-import { MdOutlineClose } from 'react-icons/md';
-import './navbar.css';
+import { useState, useEffect } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import { GoThreeBars } from 'react-icons/go'
+import { MdOutlineClose } from 'react-icons/md'
+import { links } from '../data'
 
 const Navbar = () => {
-  const [isNavShowing, setIsNavShowing] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const location = useLocation(); // Get current route
+  const [isNavShowing, setIsNavShowing] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const location = useLocation()
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50); // Change `50` to the scroll distance you prefer
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20)
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Check if the current page is an Articles page
-  const isArticlesPage = location.pathname === '/project1' || location.pathname === '/project2' || location.pathname === '/project3';
+  // Close the mobile menu whenever the page changes
+  useEffect(() => setIsNavShowing(false), [location])
 
   return (
-    <nav className={`${isArticlesPage ? (isScrolled ? 'gradient-grey' : '') : 'scrolled'}`}>
-      <div className="container nav_container">
-        <ul className={`nav__links ${isNavShowing ? 'show__nav' : 'hide__Nav'}`}>
-          {links.map(({ name, path }, index) => (
-            <li key={index}>
+    <nav className={`nav ${isScrolled ? 'nav--scrolled' : ''}`}>
+      <div className="container nav__container">
+        <Link to="/" className="nav__logo">
+          Yen<span>.</span>
+        </Link>
+        <ul className={`nav__links ${isNavShowing ? 'nav__links--open' : ''}`}>
+          {links.map(({ name, path }) => (
+            <li key={name}>
               <NavLink
                 to={path}
-                className={({ isActive }) => (isActive ? 'active-nav' : '')}
-                onClick={() => setIsNavShowing((prev) => !prev)}
+                className={({ isActive }) => (isActive && !path.includes('#') ? 'active' : '')}
               >
                 {name}
               </NavLink>
@@ -39,14 +38,16 @@ const Navbar = () => {
           ))}
         </ul>
         <button
-          className="nav__toggle-btn"
+          className="nav__toggle"
+          aria-label={isNavShowing ? 'Close menu' : 'Open menu'}
+          aria-expanded={isNavShowing}
           onClick={() => setIsNavShowing((prev) => !prev)}
         >
           {isNavShowing ? <MdOutlineClose /> : <GoThreeBars />}
         </button>
       </div>
     </nav>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar
